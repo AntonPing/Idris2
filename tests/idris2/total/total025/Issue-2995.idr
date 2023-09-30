@@ -2,18 +2,32 @@
 
 %default total
 
-%tcinline
+-- %tcinline
 incAll : Stream Nat -> Stream Nat
 incAll (x::xs) = S x :: incAll xs
 
 -- %tcinline -- uncomment this, your compiler will hang forever
+-- hang after adding fuel
 incAll' : Stream Nat -> Stream Nat
 incAll' = \(x::xs) => S x :: incAll' xs
 
 -- %tcinline -- uncomment this, your compiler will hang forever
-zs : Stream Nat -> Stream Nat
-zs xs = Z :: zs xs
+-- hang after adding fuel
+incAll'' : Stream Nat -> Stream Nat
+incAll'' = \ys => case ys of
+    (x :: xs) => S x :: incAll'' xs
 
 -- %tcinline -- uncomment this, your compiler will hang forever
-zs' : Stream Nat
-zs' = Z :: zs'
+-- terminate after adding fuel
+zs : Stream Nat
+zs = Z :: zs
+
+-- %tcinline -- uncomment this, your compiler will hang forever
+-- terminate after adding fuel
+zs' : Stream Nat -> Stream Nat
+zs' xs = Z :: zs' xs
+
+-- %tcinline -- uncomment this, your compiler will hang forever
+-- terminate after adding fuel
+zs'' : Stream Nat -> Stream Nat
+zs'' = \xs => Z :: zs'' xs
