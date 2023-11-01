@@ -104,19 +104,22 @@ mutual
              (InDelay, _, args) =>
                  do scs <- traverse (findSC defs env Unguarded pats) args
                     pure (concat scs)
-             (Guarded, Ref fc (DataCon _ _) cn, args) =>
-                 do Just ty <- lookupTyExact cn (gamma defs)
-                         | Nothing => do
-                              log "totality" 50 $ "Lookup failed"
-                              findSCcall defs env Guarded pats fc cn args
-                    findSCcall defs env Guarded pats fc cn args
-             (Toplevel, Ref fc (DataCon _ _) cn, args) =>
-                 do Just ty <- lookupTyExact cn (gamma defs)
-                         | Nothing => do
-                              log "totality" 50 $ "Lookup failed"
-                              findSCcall defs env Guarded pats fc cn args
-                    findSCcall defs env Guarded pats fc cn args
-             (_, Ref fc Func fn, args) =>
+             (Guarded, Ref fc (DataCon _ _) cn, args) => do
+                 log "totality" 0 "A"
+                 Just ty <- lookupTyExact cn (gamma defs)
+                        | Nothing => do
+                            log "totality" 50 $ "Lookup failed"
+                            findSCcall defs env Guarded pats fc cn args
+                 findSCcall defs env Guarded pats fc cn args
+             (Toplevel, Ref fc (DataCon _ _) cn, args) => do
+                 log "totality" 0 "B"
+                 Just ty <- lookupTyExact cn (gamma defs)
+                        | Nothing => do
+                            log "totality" 50 $ "Lookup failed"
+                            findSCcall defs env Guarded pats fc cn args
+                 findSCcall defs env Guarded pats fc cn args
+             (_, Ref fc Func fn, args) => do
+                 log "totality" 0 "C"
                  do logC "totality" 50 $
                        pure $ "Looking up type of " ++ show !(toFullNames fn)
                     Just ty <- lookupTyExact fn (gamma defs)
@@ -132,7 +135,9 @@ mutual
         handleCase (Ref fc nt n) args
             = do n' <- toFullNames n
                  if caseFn n'
-                    then Just <$> findSCcall defs env g pats fc n args
+                    then do
+                        log "totality" 0 "D: \{show n' ++ show (length args)}"
+                        Just <$> findSCcall defs env g pats fc n args
                     else pure Nothing
         handleCase _ _ = pure Nothing
 
@@ -314,9 +319,12 @@ mutual
            aSmaller <- resolved (gamma defs) (NS builtinNS (UN $ Basic "assert_smaller"))
            cond [(fn == NS builtinNS (UN $ Basic "assert_total"), pure [])
                 ,(caseFn fn,
-                    do scs1 <- traverse (findSC defs env g pats) args
+                    do log "totality" 0 "findSCcall enter"
+                       scs1 <- traverse (findSC defs env g pats) args
                        mps  <- getCasePats defs fn pats args
+                       log "totality" 0 "findSCcall middle"
                        scs2 <- traverse (findInCase defs g) $ fromMaybe [] mps
+                       log "totality" 0 "findSCcall leave"
                        pure (concat (scs1 ++ scs2)))
               ]
               (do scs <- traverse (findSC defs env g pats) args
@@ -335,7 +343,9 @@ mutual
                    do ps <- traverse toFullNames pats
                       pure ("Looking in case args " ++ show ps)
           logTermNF "totality" 10 "        =" env tm
+          log "totality" 0 "findInCase before normalise"
           rhs <- normaliseOpts tcOnly defs env tm
+          log "totality" 0 "findInCase after normalise"
           findSC defs env g pats (delazy defs rhs)
 
 findCalls : {auto c : Ref Ctxt Defs} ->
@@ -343,7 +353,9 @@ findCalls : {auto c : Ref Ctxt Defs} ->
             Core (List SCCall)
 findCalls defs (_ ** (env, lhs, rhs_in))
    = do let pargs = getArgs (delazy defs lhs)
+        log "totality" 0 "findCalls before normalise"
         rhs <- normaliseOpts tcOnly defs env rhs_in
+        log "totality" 0 "findCalls after normalise"
         findSC defs env Toplevel pargs (delazy defs rhs)
 
 getSC : {auto c : Ref Ctxt Defs} ->
