@@ -10,6 +10,9 @@ import Libraries.Data.SparseMatrix
 
 import Data.String
 
+import Idris.Syntax
+import Idris.Resugar
+
 %default covering
 
 data Guardedness = Toplevel | Unguarded | Guarded | InDelay
@@ -345,8 +348,15 @@ mutual
           logTermNF "totality" 10 "        =" env tm
           log "totality" 0 "findInCase before normalise"
           rhs <- normaliseOpts tcOnly defs env tm
+          rhs' <- normaliseOpts ({tcInline := False} tcOnly) defs env tm
+          s <- newRef Syn initSyntax
+          rhsp <- resugar env rhs
+          rhsp' <- resugar env rhs'
+          log "totality" 0 "\{show rhsp}"
+          log "totality" 0 "\{show rhsp'}"
           log "totality" 0 "findInCase after normalise"
           findSC defs env g pats (delazy defs rhs)
+
 
 findCalls : {auto c : Ref Ctxt Defs} ->
             Defs -> (vars ** (Env Term vars, Term vars, Term vars)) ->
