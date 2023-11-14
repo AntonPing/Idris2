@@ -304,7 +304,11 @@ parameters (defs : Defs, topopts : EvalOpts)
                                                       pure $ "Stuck function: \{show n'}"
              if redok
                 then do
-                   Just opts' <- updateLimit nt n topopts
+                   -- avoid loop that caused by tcinline
+                   let topopts' = if (tcInline topopts && elem TCInline (flags res) && List.lookup n (reduceLimit topopts) == Nothing)
+                                  then { reduceLimit $= (::) (n, 100) } topopts else topopts
+
+                   Just opts' <- updateLimit nt n topopts'
                         | Nothing => do log "eval.stuck" 10 $ "Function \{show n} past reduction limit"
                                         pure def -- name is past reduction limit
                    nf <- evalDef env opts' meta fc
