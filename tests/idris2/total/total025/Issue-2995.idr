@@ -2,14 +2,14 @@
 
 %default total
 
-%tcinline
+-- %tcinline
 zs : Stream Nat
 zs = Z :: zs
 
-%tcinline
+-- %tcinline
 zs' : Stream Nat -> Stream Nat
 zs' xs = Z :: zs' xs
 
-%tcinline
+-- %tcinline
 zs'' : Stream Nat -> Stream Nat
 zs'' = \xs => Z :: zs'' xs

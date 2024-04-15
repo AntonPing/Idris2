@@ -2,15 +2,15 @@
 
 %default total
 
-%tcinline
+-- %tcinline
 incAll : Stream Nat -> Stream Nat
 incAll (x::xs) = S x :: incAll xs
 
-%tcinline
+-- %tcinline
 incAll' : Stream Nat -> Stream Nat
 incAll' = \(x::xs) => S x :: incAll' xs
 
-%tcinline
+-- %tcinline
 incAll'' : Stream Nat -> Stream Nat
 incAll'' = \ys => case ys of
     (x :: xs) => S x :: incAll'' xs
