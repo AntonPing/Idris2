@@ -1,0 +1,11 @@
+1/1: Building TcInlineFuel (TcInlineFuel.idr)
+Error: g2 is not total, possibly not terminating due to recursive path Main.g2
+
+TcInlineFuel:18:1--18:16
+ 14 | g1 Z = Z
+ 15 | g1 (S k) = g1 (f 41 k)
+ 16 | 
+ 17 | -- but this will not
+ 18 | g2 : Nat -> Nat
+      ^^^^^^^^^^^^^^^
+
